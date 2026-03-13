@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PriMus · Aggiornamento Manodopera</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg:        #1a1c1f;
+    --surface:   #22252a;
+    --surface2:  #2a2e35;
+    --border:    #353a43;
+    --border2:   #454c58;
+    --accent:    #f97316;
+    --accent2:   #fb923c;
+    --text:      #e8eaed;
+    --text2:     #9aa3af;
+    --text3:     #6b7280;
+    --green:     #22c55e;
+    --red:       #ef4444;
+    --yellow:    #eab308;
+    --mono:      'JetBrains Mono', monospace;
+    --sans:      'Barlow', sans-serif;
+    --radius:    6px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  /* ── HEADER ───────────────────────────────── */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-mark {
+    width: 40px; height: 40px;
+    background: var(--accent);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 16px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .header-text h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: var(--text);
+  }
+  .header-text p {
+    font-size: 12px;
+    color: var(--text3);
+    font-family: var(--mono);
+  }
+  .badge {
+    margin-left: auto;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text3);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── LAYOUT ───────────────────────────────── */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .layout-full { margin-bottom: 16px; }
+
+  /* ── CARD ─────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .card-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 12px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  /* ── DROP ZONE ────────────────────────────── */
+  .drop-zone {
+    border: 1.5px dashed var(--border2);
+    border-radius: var(--radius);
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    position: relative;
+    background: var(--bg);
+  }
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(249,115,22,0.05);
+  }
+  .drop-zone.loaded {
+    border-color: var(--green);
+    background: rgba(34,197,94,0.04);
+  }
+  .drop-zone input[type=file] {
+    position: absolute; inset: 0;
+    opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .drop-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+    display: block;
+    line-height: 1;
+  }
+  .drop-label {
+    font-size: 13px;
+    color: var(--text2);
+    font-weight: 500;
+  }
+  .drop-hint {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 4px;
+    font-family: var(--mono);
+  }
+  .drop-filename {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--green);
+    margin-top: 8px;
+    word-break: break-all;
+  }
+  .drop-meta {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 3px;
+    font-family: var(--mono);
+  }
+
+  /* ── FORM GRID ────────────────────────────── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .form-grid-4 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 12px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .field label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--text3);
+    text-transform: uppercase;
+  }
+  .field input, .field select {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(249,115,22,0.15);
+  }
+  .field select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+  .field-hint {
+    font-size: 10px;
+    color: var(--text3);
+    font-family: var(--mono);
+  }
+
+  /* ── TOGGLE FORMAT ────────────────────────── */
+  .toggle-group {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .toggle-group label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text3);
+    transition: all 0.15s;
+    background: var(--bg);
+    user-select: none;
+  }
+  .toggle-group input[type=radio] { display: none; }
+  .toggle-group input[type=radio]:checked + span {
+    background: var(--accent);
+    color: #fff;
+  }
+  .toggle-group label:has(input:checked) {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+  }
+  .toggle-group label + label { border-left: 1px solid var(--border2); }
+
+  /* ── EXCEL PREVIEW ────────────────────────── */
+  .preview-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  .preview-table th {
+    background: var(--surface2);
+    color: var(--text3);
+    font-weight: 600;
+    padding: 6px 10px;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .preview-table th.col-highlight {
+    color: var(--accent);
+    background: rgba(249,115,22,0.1);
+  }
+  .preview-table td {
+    padding: 5px 10px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    white-space: nowrap;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .preview-table tr:last-child td { border-bottom: none; }
+  .preview-table td.col-highlight {
+    color: var(--accent2);
+    font-weight: 600;
+  }
+  .preview-table .row-header td {
+    background: var(--surface2);
+    color: var(--text3);
+    font-weight: 600;
+  }
+
+  /* ── RUN BUTTON ───────────────────────────── */
+  .run-btn {
+    width: 100%;
+    padding: 14px 24px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .run-btn:hover:not(:disabled) {
+    background: var(--accent2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(249,115,22,0.35);
+  }
+  .run-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .run-btn.running {
+    background: var(--surface2);
+    color: var(--text2);
+  }
+
+  /* ── LOG / RESULTS ────────────────────────── */
+  .log-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.7;
+    min-height: 80px;
+    max-height: 320px;
+    overflow-y: auto;
+    color: var(--text2);
+  }
+  .log-box .log-ok    { color: var(--green); }
+  .log-box .log-warn  { color: var(--yellow); }
+  .log-box .log-err   { color: var(--red); }
+  .log-box .log-head  { color: var(--accent); font-weight: 700; }
+  .log-box .log-dim   { color: var(--text3); }
+  .log-box .log-entry { display: block; }
+
+  /* ── STATS BAR ────────────────────────────── */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .stat {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    text-align: center;
+  }
+  .stat-val {
+    font-family: var(--mono);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    display: block;
+    line-height: 1.1;
+  }
+  .stat-val.green { color: var(--green); }
+  .stat-val.red   { color: var(--red); }
+  .stat-val.yellow{ color: var(--yellow); }
+  .stat-lbl {
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-top: 3px;
+    display: block;
+  }
+
+  /* ── DIFF TABLE ───────────────────────────── */
+  .diff-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    max-height: 240px;
+    overflow-y: auto;
+  }
+  .diff-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  .diff-table th {
+    background: var(--surface2);
+    color: var(--text3);
+    font-weight: 600;
+    padding: 7px 12px;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .diff-table td {
+    padding: 5px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+  }
+  .diff-table tr:last-child td { border-bottom: none; }
+  .diff-table .changed td { background: rgba(249,115,22,0.05); }
+  .diff-table .old-val { color: var(--text3); text-decoration: line-through; }
+  .diff-table .new-val { color: var(--accent2); font-weight: 600; }
+
+  /* ── DOWNLOAD BTN ─────────────────────────── */
+  .dl-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .dl-btn:hover {
+    background: #16a34a;
+    box-shadow: 0 4px 16px rgba(34,197,94,0.3);
+  }
+
+  /* ── DIVIDER ──────────────────────────────── */
+  .sep {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  /* ── SPINNER ──────────────────────────────── */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  /* ── SCROLLBAR ────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* ── SECTION HIDDEN ───────────────────────── */
+  .hidden { display: none !important; }
+
+  /* ── TOOLTIP ──────────────────────────────── */
+  [data-tip] { position: relative; cursor: help; }
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%; transform: translateX(-50%);
+    background: #111;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    border: 1px solid var(--border2);
+    z-index: 100;
+  }
+  [data-tip]:hover::after { opacity: 1; }
+
+  /* ── RESPONSIVE ───────────────────────────── */
+  @media (max-width: 700px) {
+    .layout { grid-template-columns: 1fr; }
+    .form-grid-4 { grid-template-columns: 1fr 1fr; }
+    .stats-bar { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">PM</div>
+  <div class="header-text">
+    <h1>PriMus · Aggiornamento Manodopera</h1>
+    <p>XMLPwe ← incidenze da elenco prezzi Excel</p>
+  </div>
+  <div class="badge">v2.0 · client-side</div>
+</header>
+
+<!-- ── STEP 1: FILES ─────────────────────────── -->
+<div class="layout">
+  <!-- XML Drop -->
+  <div class="card">
+    <div class="card-title">1 · File PriMus XML</div>
+    <div class="drop-zone" id="dropXml" ondragover="onDragOver(event,'dropXml')" ondragleave="onDragLeave(event,'dropXml')" ondrop="onDropXml(event)">
+      <input type="file" accept=".xml,.xpwe" onchange="loadXml(this.files[0])">
+      <span class="drop-icon" id="xmlIcon">📄</span>
+      <div class="drop-label" id="xmlLabel">Trascina il file XML / XPWE</div>
+      <div class="drop-hint" id="xmlHint">oppure clicca per selezionare</div>
+      <div class="drop-filename hidden" id="xmlFilename"></div>
+      <div class="drop-meta hidden" id="xmlMeta"></div>
+    </div>
+  </div>
+
+  <!-- Excel Drop -->
+  <div class="card">
+    <div class="card-title">2 · Elenco Prezzi Excel</div>
+    <div class="drop-zone" id="dropXls" ondragover="onDragOver(event,'dropXls')" ondragleave="onDragLeave(event,'dropXls')" ondrop="onDropXls(event)">
+      <input type="file" accept=".xlsx,.xls,.ods" onchange="loadExcel(this.files[0])">
+      <span class="drop-icon" id="xlsIcon">📊</span>
+      <div class="drop-label" id="xlsLabel">Trascina il file Excel</div>
+      <div class="drop-hint" id="xlsHint">oppure clicca per selezionare</div>
+      <div class="drop-filename hidden" id="xlsFilename"></div>
+      <div class="drop-meta hidden" id="xlsMeta"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── STEP 2: CONFIGURAZIONE ────────────────── -->
+<div class="card layout-full" id="configCard">
+  <div class="card-title">3 · Configurazione colonne Excel</div>
+  <div class="form-grid-4">
+
+    <div class="field">
+      <label data-tip="Foglio Excel da leggere">Foglio</label>
+      <select id="sheetSelect" onchange="onSheetChange()">
+        <option value="">— carica Excel —</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label data-tip="Colonna con il codice tariffa (es. A)">Col. Tariffa</label>
+      <input id="colTariffa" type="text" value="A" maxlength="3" placeholder="A"
+             oninput="this.value=this.value.toUpperCase(); refreshPreview()">
+      <span class="field-hint">lettera colonna Excel</span>
+    </div>
+
+    <div class="field">
+      <label data-tip="Colonna con la % di manodopera (es. E)">Col. % MDO</label>
+      <input id="colMdo" type="text" value="E" maxlength="3" placeholder="E"
+             oninput="this.value=this.value.toUpperCase(); refreshPreview()">
+      <span class="field-hint">lettera colonna Excel</span>
+    </div>
+
+    <div class="field">
+      <label data-tip="Prima riga con dati (es. 2 se riga 1 è intestazione)">Prima riga dati</label>
+      <input id="startRow" type="number" value="2" min="1" max="9999"
+             oninput="refreshPreview()">
+      <span class="field-hint">intestazione esclusa</span>
+    </div>
+
+  </div>
+
+  <div class="sep"></div>
+
+  <div class="form-grid">
+    <div class="field">
+      <label data-tip="Come sono espressi i valori nel file Excel">Formato percentuale Excel</label>
+      <div class="toggle-group">
+        <label><input type="radio" name="fmt" value="decimal" checked onchange="refreshPreview()"><span>Decimale &nbsp;0.35 → 35%</span></label>
+        <label><input type="radio" name="fmt" value="integer" onchange="refreshPreview()"><span>Intero &nbsp;&nbsp;&nbsp;35 → 35%</span></label>
+      </div>
+      <span class="field-hint">usa "Decimale" se i valori sono tipo 0.35 o 0.6</span>
+    </div>
+
+    <div class="field">
+      <label data-tip="Nome del file XML di output">Nome file output</label>
+      <input id="outputName" type="text" value="" placeholder="computo_MDO_aggiornato.xml">
+      <span class="field-hint">verrà scaricato dopo l'elaborazione</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── ANTEPRIMA EXCEL ───────────────────────── -->
+<div class="card layout-full hidden" id="previewCard">
+  <div class="card-title">Anteprima dati Excel</div>
+  <div id="previewWrap"></div>
+</div>
+
+<!-- ── RUN ───────────────────────────────────── -->
+<div class="layout-full">
+  <button class="run-btn" id="runBtn" onclick="runUpdate()" disabled>
+    <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z" fill="currentColor"/></svg>
+    Avvia aggiornamento
+  </button>
+</div>
+
+<!-- ── RISULTATI ─────────────────────────────── -->
+<div class="card layout-full hidden" id="resultsCard">
+  <div class="card-title">Risultati</div>
+
+  <div class="stats-bar" id="statsBar">
+    <div class="stat">
+      <span class="stat-val green" id="statUpdated">—</span>
+      <span class="stat-lbl">Voci aggiornate</span>
+    </div>
+    <div class="stat">
+      <span class="stat-val" id="statTotal">—</span>
+      <span class="stat-lbl">Voci totali XML</span>
+    </div>
+    <div class="stat">
+      <span class="stat-val yellow" id="statChanged">—</span>
+      <span class="stat-lbl">Valori modificati</span>
+    </div>
+    <div class="stat">
+      <span class="stat-val red" id="statMissing">—</span>
+      <span class="stat-lbl">Non trovate</span>
+    </div>
+  </div>
+
+  <div class="diff-table-wrap" id="diffWrap" style="margin-bottom:14px"></div>
+
+  <div id="logWrap" class="log-box" id="logBox"></div>
+
+  <div class="sep"></div>
+
+  <button class="dl-btn" id="dlBtn" onclick="downloadResult()">
+    <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M12 16l-6-6h4V4h4v6h4l-6 6zM4 20h16v-2H4v2z" fill="currentColor"/></svg>
+    Scarica XML aggiornato
+  </button>
+</div>
+
+<script>
+// ──────────────────────────────────────────────────────────────
+// STATE
+// ──────────────────────────────────────────────────────────────
+let xmlFile = null;
+let xlsFile = null;
+let xlsWorkbook = null;
+let resultXml = null;
+let resultFilename = '';
+
+// ──────────────────────────────────────────────────────────────
+// DRAG & DROP HANDLERS
+// ──────────────────────────────────────────────────────────────
+function onDragOver(e, id) {
+  e.preventDefault();
+  document.getElementById(id).classList.add('dragover');
+}
+function onDragLeave(e, id) {
+  document.getElementById(id).classList.remove('dragover');
+}
+function onDropXml(e) {
+  e.preventDefault();
+  document.getElementById('dropXml').classList.remove('dragover');
+  const f = e.dataTransfer.files[0];
+  if (f) loadXml(f);
+}
+function onDropXls(e) {
+  e.preventDefault();
+  document.getElementById('dropXls').classList.remove('dragover');
+  const f = e.dataTransfer.files[0];
+  if (f) loadExcel(f);
+}
+
+// ──────────────────────────────────────────────────────────────
+// FILE LOADING
+// ──────────────────────────────────────────────────────────────
+function loadXml(file) {
+  if (!file) return;
+  xmlFile = file;
+
+  const zone = document.getElementById('dropXml');
+  zone.classList.add('loaded');
+  document.getElementById('xmlIcon').textContent = '✅';
+  document.getElementById('xmlLabel').textContent = 'File XML caricato';
+  document.getElementById('xmlHint').classList.add('hidden');
+
+  const fn = document.getElementById('xmlFilename');
+  fn.textContent = file.name;
+  fn.classList.remove('hidden');
+
+  const meta = document.getElementById('xmlMeta');
+  meta.textContent = `${(file.size/1024).toFixed(1)} KB`;
+  meta.classList.remove('hidden');
+
+  // Suggerisci nome output
+  const base = file.name.replace(/\.(xml|xpwe)$/i, '');
+  document.getElementById('outputName').value = `${base}_MDO_aggiornato.xml`;
+
+  checkReady();
+}
+
+function loadExcel(file) {
+  if (!file) return;
+  xlsFile = file;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      xlsWorkbook = XLSX.read(e.target.result, { type: 'array' });
+
+      const zone = document.getElementById('dropXls');
+      zone.classList.add('loaded');
+      document.getElementById('xlsIcon').textContent = '✅';
+      document.getElementById('xlsLabel').textContent = 'File Excel caricato';
+      document.getElementById('xlsHint').classList.add('hidden');
+
+      const fn = document.getElementById('xlsFilename');
+      fn.textContent = file.name;
+      fn.classList.remove('hidden');
+
+      const sheets = xlsWorkbook.SheetNames;
+      const meta = document.getElementById('xlsMeta');
+      meta.textContent = `${sheets.length} foglio/i · ${(file.size/1024).toFixed(1)} KB`;
+      meta.classList.remove('hidden');
+
+      // Popola select fogli
+      const sel = document.getElementById('sheetSelect');
+      sel.innerHTML = '';
+      sheets.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s; opt.textContent = s;
+        sel.appendChild(opt);
+      });
+
+      refreshPreview();
+      checkReady();
+    } catch(err) {
+      alert('Errore lettura Excel: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function checkReady() {
+  const ok = xmlFile && xlsWorkbook;
+  document.getElementById('runBtn').disabled = !ok;
+}
+
+// ──────────────────────────────────────────────────────────────
+// EXCEL PREVIEW
+// ──────────────────────────────────────────────────────────────
+function colLetterToIdx(letter) {
+  letter = (letter || '').trim().toUpperCase();
+  let r = 0;
+  for (let ch of letter) r = r * 26 + (ch.charCodeAt(0) - 64);
+  return r - 1; // 0-based
+}
+
+function onSheetChange() { refreshPreview(); }
+
+function refreshPreview() {
+  if (!xlsWorkbook) return;
+
+  const sheetName = document.getElementById('sheetSelect').value;
+  const colTar = document.getElementById('colTariffa').value || 'A';
+  const colMdo = document.getElementById('colMdo').value || 'E';
+  const startRow = parseInt(document.getElementById('startRow').value) || 2;
+  const isDecimal = document.querySelector('input[name=fmt]:checked').value === 'decimal';
+
+  const ws = xlsWorkbook.Sheets[sheetName];
+  if (!ws) return;
+
+  const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+  if (!data.length) return;
+
+  const idxTar = colLetterToIdx(colTar);
+  const idxMdo = colLetterToIdx(colMdo);
+  const maxCols = Math.max(...data.map(r => r.length));
+
+  // Genera intestazioni colonne A B C ...
+  const colHeaders = [];
+  for (let i = 0; i < Math.min(maxCols, 10); i++) {
+    let s = '', n = i + 1;
+    while (n > 0) { s = String.fromCharCode(64 + (n % 26 || 26)) + s; n = Math.floor((n-1)/26); }
+    colHeaders.push(s);
+  }
+
+  let html = '<div class="preview-table-wrap"><table class="preview-table"><thead><tr>';
+  html += '<th class="log-dim">#</th>';
+  colHeaders.forEach((h, i) => {
+    const hi = (i === idxTar || i === idxMdo) ? ' col-highlight' : '';
+    const badge = i === idxTar ? ' [Tariffa]' : i === idxMdo ? ' [%MDO]' : '';
+    html += `<th class="${hi}">${h}${badge}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  // Mostra fino a 8 righe attorno all'area dati
+  const previewRows = data.slice(0, Math.min(data.length, startRow + 7));
+  previewRows.forEach((row, ri) => {
+    const rowNum = ri + 1;
+    const isHeader = rowNum < startRow;
+    html += `<tr${isHeader ? ' class="row-header"' : ''}>`;
+    html += `<td class="log-dim">${rowNum}${isHeader ? '' : ''}</td>`;
+    for (let ci = 0; ci < colHeaders.length; ci++) {
+      const val = row[ci] !== undefined ? String(row[ci]) : '';
+      const isHi = (ci === idxTar || ci === idxMdo);
+      let display = val.length > 40 ? val.slice(0, 38) + '…' : val;
+
+      // Per la colonna MDO mostra sia il valore raw che convertito
+      if (ci === idxMdo && !isHeader && val !== '') {
+        const n = parseFloat(val);
+        if (!isNaN(n)) {
+          const converted = isDecimal ? (n * 100).toFixed(1) + '%' : n + '%';
+          display = `${val} → ${converted}`;
+        }
+      }
+      html += `<td${isHi ? ' class="col-highlight"' : ''}>${display}</td>`;
+    }
+    html += '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+
+  const card = document.getElementById('previewCard');
+  card.classList.remove('hidden');
+  document.getElementById('previewWrap').innerHTML = html;
+}
+
+// ──────────────────────────────────────────────────────────────
+// CORE: LEGGI EXCEL
+// ──────────────────────────────────────────────────────────────
+function readExcelData() {
+  const sheetName = document.getElementById('sheetSelect').value;
+  const colTar = document.getElementById('colTariffa').value || 'A';
+  const colMdo = document.getElementById('colMdo').value || 'E';
+  const startRow = parseInt(document.getElementById('startRow').value) || 2;
+  const isDecimal = document.querySelector('input[name=fmt]:checked').value === 'decimal';
+
+  const ws = xlsWorkbook.Sheets[sheetName];
+  const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+  const idxTar = colLetterToIdx(colTar);
+  const idxMdo = colLetterToIdx(colMdo);
+
+  const map = {};
+  const skipped = [];
+
+  for (let ri = startRow - 1; ri < data.length; ri++) {
+    const row = data[ri];
+    if (!row) continue;
+    const tar = row[idxTar];
+    const mdo = row[idxMdo];
+
+    if (tar === undefined || tar === '') continue;
+    const tarStr = String(tar).trim();
+    if (!tarStr) continue;
+
+    const mdoNum = parseFloat(mdo);
+    if (isNaN(mdoNum)) {
+      skipped.push(`Riga ${ri+1}: tariffa "${tarStr}" - valore MDO non numerico: "${mdo}"`);
+      continue;
+    }
+
+    map[tarStr] = isDecimal ? Math.round(mdoNum * 1000) / 10 : mdoNum;
+  }
+
+  return { map, skipped };
+}
+
+// ──────────────────────────────────────────────────────────────
+// CORE: AGGIORNA XML
+// ──────────────────────────────────────────────────────────────
+function formatMdo(val) {
+  // PriMus usa numeri senza segno %, es. "35" o "36.6"
+  const n = parseFloat(val);
+  if (n === Math.round(n)) return String(Math.round(n));
+  return n.toFixed(1).replace(/\.0$/, '');
+}
+
+function updatePrimusXml(xmlText, mdoMap) {
+  // Parse XML
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xmlText, 'text/xml');
+
+  const parseErr = doc.querySelector('parsererror');
+  if (parseErr) throw new Error('XML non valido: ' + parseErr.textContent.slice(0, 200));
+
+  const epItems = doc.querySelectorAll('EPItem');
+  if (!epItems.length) throw new Error('Nessun tag <EPItem> trovato. File PriMus valido?');
+
+  const stats = { updated: 0, changed: 0, totalXml: epItems.length, notFound: [], modifications: [] };
+
+  epItems.forEach(item => {
+    const tarEl = item.querySelector('Tariffa');
+    if (!tarEl || !tarEl.textContent) return;
+    const tar = tarEl.textContent.trim();
+
+    if (tar in mdoMap) {
+      const incMdoEl = item.querySelector('IncMDO');
+      const newVal = formatMdo(mdoMap[tar]);
+      stats.updated++;
+
+      if (incMdoEl) {
+        const oldVal = incMdoEl.textContent;
+        if (oldVal !== newVal) {
+          stats.modifications.push({ tar, oldVal, newVal });
+          stats.changed++;
+        }
+        incMdoEl.textContent = newVal;
+      } else {
+        const el = doc.createElement('IncMDO');
+        el.textContent = newVal;
+        item.appendChild(el);
+        stats.modifications.push({ tar, oldVal: '(nuovo)', newVal });
+        stats.changed++;
+      }
+    } else {
+      // Cerca solo tariffe che non sono vuote
+      if (tar) stats.notFound.push(tar);
+    }
+  });
+
+  // Serializza
+  const serializer = new XMLSerializer();
+  let xmlOut = serializer.serializeToString(doc);
+
+  // Rimuovi eventuale XML declaration aggiunta dal serializer e riaggiungi pulita
+  xmlOut = xmlOut.replace(/^<\?xml[^?]*\?>\s*/, '');
+
+  // Verifica se il sorgente aveva la PI di PriMus
+  let pi = '';
+  if (xmlText.trimStart().startsWith('<?mso-application')) {
+    const end = xmlText.indexOf('?>') + 2;
+    pi = xmlText.slice(xmlText.trimStart().startsWith('<?xml') ? xmlText.indexOf('\n') + 1 : 0, end).trim();
+  }
+
+  let finalXml = '<?xml version="1.0" encoding="utf-8"?>';
+  if (pi) finalXml += '\n' + pi;
+  finalXml += '\n' + xmlOut;
+
+  return { xmlOut: finalXml, stats };
+}
+
+// ──────────────────────────────────────────────────────────────
+// RUN
+// ──────────────────────────────────────────────────────────────
+function runUpdate() {
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  btn.classList.add('running');
+  btn.innerHTML = '<div class="spinner"></div> Elaborazione in corso…';
+
+  // Usa setTimeout per permettere al browser di aggiornare la UI
+  setTimeout(async () => {
+    try {
+      const log = document.getElementById('logWrap');
+      const results = document.getElementById('resultsCard');
+
+      results.classList.remove('hidden');
+      log.innerHTML = '';
+
+      const addLog = (msg, cls = '') => {
+        const s = document.createElement('span');
+        s.className = 'log-entry' + (cls ? ' ' + cls : '');
+        s.textContent = msg;
+        log.appendChild(s);
+        log.scrollTop = log.scrollHeight;
+      };
+
+      addLog('── Lettura dati Excel ────────────────────────', 'log-head');
+
+      const { map, skipped } = readExcelData();
+      addLog(`✓ Caricate ${Object.keys(map).length} tariffe dall'Excel`, 'log-ok');
+
+      if (skipped.length) {
+        addLog(`⚠ ${skipped.length} righe ignorate:`, 'log-warn');
+        skipped.slice(0, 5).forEach(s => addLog('  ' + s, 'log-warn'));
+        if (skipped.length > 5) addLog(`  … e altre ${skipped.length - 5}`, 'log-dim');
+      }
+
+      addLog('── Parsing XML PriMus ────────────────────────', 'log-head');
+
+      const xmlText = await xmlFile.text();
+      addLog(`✓ File XML letto (${(xmlText.length/1024).toFixed(1)} KB)`, 'log-ok');
+
+      const { xmlOut, stats } = updatePrimusXml(xmlText, map);
+
+      addLog(`✓ ${stats.totalXml} voci di prezzo trovate nel file PriMus`, 'log-ok');
+      addLog(`✓ ${stats.updated} voci aggiornate (${stats.changed} valori modificati)`, 'log-ok');
+
+      if (stats.notFound.length) {
+        addLog(`⚠ ${stats.notFound.length} tariffe Excel non trovate nel PriMus:`, 'log-warn');
+        stats.notFound.slice(0, 8).forEach(t => addLog('  ✗ ' + t, 'log-warn'));
+        if (stats.notFound.length > 8) addLog(`  … e altre ${stats.notFound.length - 8}`, 'log-dim');
+      }
+
+      addLog('── Completato ────────────────────────────────', 'log-head');
+      addLog('Il file è pronto per il download.', 'log-ok');
+
+      // Aggiorna stats
+      document.getElementById('statUpdated').textContent = stats.updated;
+      document.getElementById('statTotal').textContent = stats.totalXml;
+      document.getElementById('statChanged').textContent = stats.changed;
+      document.getElementById('statMissing').textContent = stats.notFound.length;
+
+      // Tabella diff
+      buildDiffTable(stats.modifications);
+
+      resultXml = xmlOut;
+      resultFilename = document.getElementById('outputName').value || 'primus_MDO_aggiornato.xml';
+
+      results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    } catch(err) {
+      const log = document.getElementById('logWrap');
+      const s = document.createElement('span');
+      s.className = 'log-entry log-err';
+      s.textContent = '❌ ERRORE: ' + err.message;
+      log.appendChild(s);
+      console.error(err);
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('running');
+      btn.innerHTML = '<svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z" fill="currentColor"/></svg> Avvia aggiornamento';
+    }
+  }, 60);
+}
+
+// ──────────────────────────────────────────────────────────────
+// DIFF TABLE
+// ──────────────────────────────────────────────────────────────
+function buildDiffTable(mods) {
+  const wrap = document.getElementById('diffWrap');
+  if (!mods.length) { wrap.innerHTML = ''; return; }
+
+  let html = '<div class="diff-table-wrap"><table class="diff-table">';
+  html += '<thead><tr><th>Tariffa</th><th>Valore precedente</th><th>Nuovo valore</th></tr></thead><tbody>';
+
+  mods.forEach(m => {
+    const changed = m.oldVal !== m.newVal;
+    html += `<tr${changed ? ' class="changed"' : ''}>`;
+    html += `<td>${m.tar}</td>`;
+    html += `<td class="old-val">${m.oldVal}</td>`;
+    html += `<td class="new-val">${m.newVal}%</td>`;
+    html += '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+  wrap.innerHTML = html;
+}
+
+// ──────────────────────────────────────────────────────────────
+// DOWNLOAD
+// ──────────────────────────────────────────────────────────────
+function downloadResult() {
+  if (!resultXml) return;
+
+  const blob = new Blob([resultXml], { type: 'application/xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = resultFilename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
